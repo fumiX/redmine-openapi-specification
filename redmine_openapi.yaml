@@ -1,347 +1,344 @@
-swagger: '2.0'
+openapi: 3.0.0
 info:
-  title: 'Redmine API'
-  description: 'Custom (incomplete!) OpenAPI Specification for the Redmine Rest API'
-  version: '1.3'
-host: localhost:8080
-basePath: /
-schemes: [https]
+  title: Redmine API
+  description: Custom (incomplete!) OpenAPI Specification for the Redmine Rest API
+  version: 1.0.0-oas3
 externalDocs:
   description: Redmine API Documentation
-  url: 'https://www.redmine.org/projects/redmine/wiki/Rest_api'
-
-
-##Notes
-# PowerApps Custom Connectors do NOT support Operation level Parameter definition
-
-## Implemented Queries
-#
-# Projects
-# - ProjectsList
-# - ProjectShow
-#
-# Issues
-# - IssuesList
-# - IssueShow
-# - IssueCreate
-# - IssueUpdate
-# - IssueDelete
-#
-# Time Entries
-# - TimeList
-# - TimeShow
-# - TimeCreate
-# - TimeUpdate
-# - TimeDelete
-#
-# Issue Statuses
-# - StatusesList
-#
-# Trackers
-# - TrackersList
-#
-# +Validation Error Response
-
-
-## "Content-Type" and "Accepts" Header.
-# XML is also supported, but I don't use it
-consumes: [application/json]
-produces: [application/json]
-
-
-## Authentication
-# https://swagger.io/docs/specification/2-0/authentication/
-securityDefinitions:
-  api_key:
-    type: apiKey
-    in: header
-    name: X-Redmine-API-Key
-
+  url: https://www.redmine.org/projects/redmine/wiki/Rest_api
 security:
   - api_key: []
-
-
-## Tags
-# https://swagger.io/docs/specification/2-0/grouping-operations-with-tags/
 tags:
-  - name: 'Projects'
+  - name: Projects
     externalDocs:
       url: https://www.redmine.org/projects/redmine/wiki/Rest_Projects
-  - name: 'Issues'
+  - name: Issues
     externalDocs:
       url: https://www.redmine.org/projects/redmine/wiki/Rest_Issues
-  - name: 'TimeEntries'
+  - name: TimeEntries
     externalDocs:
       url: https://www.redmine.org/projects/redmine/wiki/Rest_TimeEntries
-  - name: 'IssueStatuses'
+  - name: IssueStatuses
     externalDocs:
       url: https://www.redmine.org/projects/redmine/wiki/Rest_IssueStatuses
-  - name: 'Trackers'
+  - name: Trackers
     externalDocs:
-      url: 'https://www.redmine.org/projects/redmine/wiki/Rest_Trackers'
-
-
-## Endpoints
-# https://swagger.io/docs/specification/2-0/paths-and-operations/
+      url: https://www.redmine.org/projects/redmine/wiki/Rest_Trackers
 paths:
   /projects.json:
     get:
-      summary: 'List Projects'
-      description: 'Returns all projects (all public projects and private projects where user have access to).'
+      summary: List Projects
+      description: >-
+        Returns all projects (all public projects and private projects where
+        user have access to).
       operationId: ProjectsList
-      tags: [ Projects ]
+      tags:
+        - Projects
       parameters:
-        - $ref: '#/parameters/limitParam'
-        - $ref: '#/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/offsetParam'
         - name: include
           in: query
-          description: 'fetch associated data (optional). Possible values: trackers, issue_categories, enabled_modules. Values should be separated by a comma ",".'
+          description: >-
+            fetch associated data (optional). Possible values: trackers,
+            issue_categories, enabled_modules. Values should be separated by a
+            comma ",".
           required: false
-          type: string
-      responses:
-        200:
-          description: "OK"
           schema:
-            type: object
-            required:
-              - projects
-              - total_count
-              - offset
-              - limit
-            properties:
-              projects:
-                title: Projects
-                type: array
-                items:
-                  $ref: '#/definitions/project'
-              total_count:
-                $ref: '#/definitions/totalCount'
-              offset:
-                $ref: '#/definitions/offset'
-              limit:
-                $ref: '#/definitions/limit'
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - projects
+                  - total_count
+                  - offset
+                  - limit
+                properties:
+                  projects:
+                    title: Projects
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/project'
+                  total_count:
+                    $ref: '#/components/schemas/totalCount'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  limit:
+                    $ref: '#/components/schemas/limit'
   /projects/{id}.json:
     get:
-      summary: 'Show Project'
-      description: 'Returns the project of given id or identifier.'
+      summary: Show Project
+      description: Returns the project of given id or identifier.
       operationId: ProjectShow
-      tags: [ Projects ]
+      tags:
+        - Projects
       parameters:
-        - $ref: '#/parameters/idParam'
+        - $ref: '#/components/parameters/idParam'
         - name: include
           in: query
-          description: 'fetch associated data (optional). Possible values: trackers, issue_categories, enabled_modules (since 2.6.0), time_entry_activities (since 3.4.0). Values should be separated by a comma ",".'
+          description: >-
+            fetch associated data (optional). Possible values: trackers,
+            issue_categories, enabled_modules (since 2.6.0),
+            time_entry_activities (since 3.4.0). Values should be separated by a
+            comma ",".
           required: false
-          type: string
-      responses:
-        200:
-          description: "OK"
           schema:
-            type: object
-            required:
-              - project
-            properties:
-              project:
-                $ref: '#/definitions/project'
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - project
+                properties:
+                  project:
+                    $ref: '#/components/schemas/project'
   /issues.json:
     get:
-      summary: 'List issues'
-      description: 'Returns a paginated list of issues. By default, it returns open issues only.'
+      summary: List issues
+      description: >-
+        Returns a paginated list of issues. By default, it returns open issues
+        only.
       operationId: IssuesList
-      tags: [ Issues ]
+      tags:
+        - Issues
       parameters:
-        - $ref: '#/parameters/limitParam'
-        - $ref: '#/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/offsetParam'
         - name: sort
           in: query
           description: column to sort with. Append :desc to invert the order. (optional)
           required: false
-          type: string
+          schema:
+            type: string
         - name: include
           in: query
-          description: 'fetch associated data (optional, use comma to fetch multiple associations). Possible values: children,attachments,relations,changesets,journals,watchers'
+          description: >-
+            fetch associated data (optional, use comma to fetch multiple
+            associations). Possible values:
+            children,attachments,relations,changesets,journals,watchers
           required: false
-          type: string
+          schema:
+            type: string
         - name: issue_id
           in: query
-          description: 'get issue with the given id or multiple issues by id using comma to separate id.'
+          description: >-
+            get issue with the given id or multiple issues by id using comma to
+            separate id.
           required: false
-          type: integer
-          format: int32
+          schema:
+            type: integer
+            format: int32
         - name: project_id
           in: query
-          description: 'get issues from the project with the given id (a numeric value, not a project identifier).'
+          description: >-
+            get issues from the project with the given id (a numeric value, not
+            a project identifier).
           required: false
-          type: integer
-          format: int32
+          schema:
+            type: integer
+            format: int32
         - name: subproject_id
           in: query
-          description: 'get issues from the subproject with the given id. You can use project_id=XXX&subproject_id=!* to get only the issues of a given project and none of its subprojects.'
+          description: >-
+            get issues from the subproject with the given id. You can use
+            project_id=XXX&subproject_id=!* to get only the issues of a given
+            project and none of its subprojects.
           required: false
-          type: integer
-          format: int32
+          schema:
+            type: integer
+            format: int32
         - name: tracker_id
           in: query
-          description: 'get issues from the tracker with the given id'
+          description: get issues from the tracker with the given id
           required: false
-          type: integer
-          format: int32
+          schema:
+            type: integer
+            format: int32
         - name: status_id
           in: query
-          description: 'get issues with the given status id only. Possible values: open, closed, * to get open and closed issues, status id'
+          description: >-
+            get issues with the given status id only. Possible values: open,
+            closed, * to get open and closed issues, status id
           required: false
-          type: string
+          schema:
+            type: string
         - name: assigned_to_id
           in: query
-          description: 'get issues which are assigned to the given user id. me can be used instead an ID to fetch all issues from the logged in user (via API key or HTTP auth)'
+          description: >-
+            get issues which are assigned to the given user id. me can be used
+            instead an ID to fetch all issues from the logged in user (via API
+            key or HTTP auth)
           required: false
-          type: string
-      responses:
-        200:
-          description: "OK"
           schema:
-            type: object
-            required:
-              - issues
-              - total_count
-              - offset
-              - limit
-            properties:
-              issues: #array
-                title: Issues
-                type: array
-                items:
-                  $ref: '#/definitions/issue'
-              total_count:
-                $ref: '#/definitions/totalCount'
-              offset:
-                $ref: '#/definitions/offset'
-              limit:
-                $ref: '#/definitions/limit'
-    post:
-      summary: 'Create issue'
-      description: 'Creates a new issue.'
-      operationId: IssueCreate
-      tags: [ Issues ]
-      parameters:
-        - name: issue
-          in: body
-          required: true
-          description: 'issue attributes'
-          schema:
-            title: Body
-            type: object
-            required:
-              - issue
-            properties:
-              issue:
-                type: object
-                title: Issue
-                required:
-                  - project_id
-                  - subject
-                  - priority_id
-                  - tracker_id
-                properties:
-                  project_id:
-                    title: ProjectId
-                    type: integer
-                    format: int32
-                  tracker_id:
-                    title: TrackerId
-                    type: integer
-                    format: int32
-                  status_id:
-                    title: StatusId
-                    type: integer
-                    format: int32
-                  priority_id:
-                    title: PriorityId
-                    type: integer
-                    format: int32
-                  subject:
-                    title: Subject
-                    type: string
-                  description:
-                    title: Description
-                    type: string
-                  category_id:
-                    title: CategoryId
-                    type: integer
-                    format: int32
-                  fixed_version_id:
-                    title: FixedVersionId
-                    type: integer
-                    format: int32
-                    description: 'ID of the Target Versions (previously called "Fixed Version" and still referred to as such in the API)'
-                  assigned_to_id:
-                    title: AssignedToId
-                    type: integer
-                    format: int32
-                    description: 'ID of the user to assign the issue to (currently no mechanism to assign by name)'
-                  parent_issue_id:
-                    title: ParentIssueId
-                    type: integer
-                    format: int32
-                    description: 'ID of the parent issue'
-                  custom_fields:
-                    title: CustomFields
-                    type: array
-                    items:
-                      type: object
-                  watcher_user_ids:
-                    title: WatcherUserIds
-                    type: array
-                    description: 'Array of user ids to add as watchers'
-                    items:
-                      type: integer
-                      format: int32
-                  is_private:
-                    title: IsPrivate
-                    type: boolean
-                  estimated_hours:
-                    title: EstimatedHours
-                    type: number
-                    format: float
-      responses:
-        201:
-          description: 'Created: issue was created'
-        422:
-          $ref: '#/responses/validationError'
-  /issues/{id}.json:
-      get:
-        summary: 'Show issues'
-        description: 'Returns the issue of given id or identifier.'
-        operationId: IssueShow
-        tags: [ Issues ]
-        parameters:
-          - $ref: '#/parameters/idParam'
-          - name: include
-            in: query
-            description: 'fetch associated data (optional, use comma to fetch multiple associations). Possible values: children,attachments,relations,changesets,journals,watchers'
-            required: false
             type: string
-        responses:
-          200:
-            description: OK
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - issues
+                  - total_count
+                  - offset
+                  - limit
+                properties:
+                  issues:
+                    title: Issues
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/issue'
+                  total_count:
+                    $ref: '#/components/schemas/totalCount'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  limit:
+                    $ref: '#/components/schemas/limit'
+    post:
+      summary: Create issue
+      description: Creates a new issue.
+      operationId: IssueCreate
+      tags:
+        - Issues
+      requestBody:
+        content:
+          application/json:
             schema:
+              title: Body
               type: object
               required:
                 - issue
               properties:
                 issue:
-                  $ref: '#/definitions/issue'
-      put:
-        summary: 'Update issue'
-        description: 'Updates a issue.'
-        operationId: IssueUpdate
-        tags: [ Issues ]
-        parameters:
-          - $ref: '#/parameters/idParam'
-          - name: issue
-            in: body
-            required: true
-            description: 'issue attributes'
+                  type: object
+                  title: Issue
+                  required:
+                    - project_id
+                    - subject
+                    - priority_id
+                    - tracker_id
+                  properties:
+                    project_id:
+                      title: ProjectId
+                      type: integer
+                      format: int32
+                    tracker_id:
+                      title: TrackerId
+                      type: integer
+                      format: int32
+                    status_id:
+                      title: StatusId
+                      type: integer
+                      format: int32
+                    priority_id:
+                      title: PriorityId
+                      type: integer
+                      format: int32
+                    subject:
+                      title: Subject
+                      type: string
+                    description:
+                      title: Description
+                      type: string
+                    category_id:
+                      title: CategoryId
+                      type: integer
+                      format: int32
+                    fixed_version_id:
+                      title: FixedVersionId
+                      type: integer
+                      format: int32
+                      description: >-
+                        ID of the Target Versions (previously called "Fixed
+                        Version" and still referred to as such in the API)
+                    assigned_to_id:
+                      title: AssignedToId
+                      type: integer
+                      format: int32
+                      description: >-
+                        ID of the user to assign the issue to (currently no
+                        mechanism to assign by name)
+                    parent_issue_id:
+                      title: ParentIssueId
+                      type: integer
+                      format: int32
+                      description: ID of the parent issue
+                    custom_fields:
+                      title: CustomFields
+                      type: array
+                      items:
+                        type: object
+                    watcher_user_ids:
+                      title: WatcherUserIds
+                      type: array
+                      description: Array of user ids to add as watchers
+                      items:
+                        type: integer
+                        format: int32
+                    is_private:
+                      title: IsPrivate
+                      type: boolean
+                    estimated_hours:
+                      title: EstimatedHours
+                      type: string
+        description: issue attributes
+        required: true
+      responses:
+        '201':
+          description: 'Created: issue was created'
+        '422':
+          $ref: '#/components/responses/validationError'
+  /issues/{id}.json:
+    get:
+      summary: Show issues
+      description: Returns the issue of given id or identifier.
+      operationId: IssueShow
+      tags:
+        - Issues
+      parameters:
+        - $ref: '#/components/parameters/idParam'
+        - name: include
+          in: query
+          description: >-
+            fetch associated data (optional, use comma to fetch multiple
+            associations). Possible values:
+            children,attachments,relations,changesets,journals,watchers
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - issue
+                properties:
+                  issue:
+                    $ref: '#/components/schemas/issue'
+    put:
+      summary: Update issue
+      description: Updates a issue.
+      operationId: IssueUpdate
+      tags:
+        - Issues
+      parameters:
+        - $ref: '#/components/parameters/idParam'
+      requestBody:
+        content:
+          application/json:
             schema:
               title: Body
               type: object
@@ -382,17 +379,21 @@ paths:
                       title: FixedVersionId
                       type: integer
                       format: int32
-                      description: 'ID of the Target Versions (previously called "Fixed Version" and still referred to as such in the API)'
+                      description: >-
+                        ID of the Target Versions (previously called "Fixed
+                        Version" and still referred to as such in the API)
                     assigned_to_id:
                       title: AssignedToId
                       type: integer
                       format: int32
-                      description: 'ID of the user to assign the issue to (currently no mechanism to assign by name)'
+                      description: >-
+                        ID of the user to assign the issue to (currently no
+                        mechanism to assign by name)
                     parent_issue_id:
                       title: ParentIssueId
                       type: integer
                       format: int32
-                      description: 'ID of the parent issue'
+                      description: ID of the parent issue
                     custom_fields:
                       title: CustomFields
                       type: array
@@ -401,7 +402,7 @@ paths:
                     watcher_user_ids:
                       title: WatcherUserIds
                       type: array
-                      description: 'Array of user ids to add as watchers'
+                      description: Array of user ids to add as watchers
                       items:
                         type: integer
                         format: int32
@@ -410,427 +411,556 @@ paths:
                       type: boolean
                     estimated_hours:
                       title: EstimatedHours
-                      type: number
-                      format: float
+                      type: string
                     notes:
                       title: Notes
-                      description: 'Comments about the update'
+                      description: Comments about the update
                       type: string
                     private_notes:
                       title: PrivateNotes
-                      description: 'true if notes are private'
+                      description: true if notes are private
                       type: boolean
-        responses:
-          201:
-            description: 'OK'
-          422:
-            $ref: '#/responses/validationError'
-      delete:
-        summary: 'Delete issue'
-        description: 'Deletes a issue.'
-        operationId: IssueDelete
-        tags: [ Issues ]
-        parameters:
-          - $ref: '#/parameters/idParam'
-        responses:
-          200:
-            description: OK
+        description: issue attributes
+        required: true
+      responses:
+        '201':
+          description: OK
+        '422':
+          $ref: '#/components/responses/validationError'
+    delete:
+      summary: Delete issue
+      description: Deletes a issue.
+      operationId: IssueDelete
+      tags:
+        - Issues
+      parameters:
+        - $ref: '#/components/parameters/idParam'
+      responses:
+        '200':
+          description: OK
   /time_entries.json:
     get:
-      summary: 'List time entries'
-      description: 'Returns time entries.'
+      summary: List time entries
+      description: Returns time entries.
       operationId: TimeList
-      tags: [ TimeEntries ]
+      tags:
+        - TimeEntries
       parameters:
-        - $ref: '#/parameters/limitParam'
-        - $ref: '#/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/offsetParam'
         - name: user_id
           in: query
           required: false
-          type: string
+          schema:
+            type: string
         - name: project_id
           in: query
-          description: 'When filtering by project id, you can use either project numeric ID or its string identifier.'
+          description: >-
+            When filtering by project id, you can use either project numeric ID
+            or its string identifier.
           required: false
-          type: string
+          schema:
+            type: string
         - name: spent_on
           in: query
           required: false
           description: 'Date syntax: YYYY-MM-DD'
-          type: string
+          schema:
+            type: string
         - name: from
           in: query
           required: false
           description: 'Date syntax: YYYY-MM-DD'
-          type: string
+          schema:
+            type: string
         - name: to
           in: query
           description: 'Date syntax: YYYY-MM-DD'
           required: false
-          type: string
+          schema:
+            type: string
       responses:
-        200:
+        '200':
           description: OK
-          schema:
-            type: object
-            required:
-              - time_entries
-              - total_count
-              - offset
-              - limit
-            properties:
-              time_entries:
-                type: array
-                title: TimeEntries
-                items:
-                  $ref: '#/definitions/timeEntry'
-              total_count:
-                $ref: '#/definitions/totalCount'
-              offset:
-                $ref: '#/definitions/offset'
-              limit:
-                $ref: '#/definitions/limit'
-    post:
-      summary: 'Create a time entry'
-      description: 'Creates a time entry.'
-      operationId: TimeCreate
-      tags: [ TimeEntries ]
-      parameters:
-        - name: time_entry
-          in: body
-          required: true
-          description: 'the time entry to add. (either issue_id or project id is required!)'
-          schema:
-            type: object
-            title: Body
-            required:
-              - time_entry
-            properties:
-              time_entry:
-                title: TimeEntry
+          content:
+            application/json:
+              schema:
                 type: object
                 required:
-                  - hours
-                  - comments
+                  - time_entries
+                  - total_count
+                  - offset
+                  - limit
                 properties:
-                  issue_id:
-                    title: IssueId
-                    type: integer
-                    format: int32
-                    description: 'the issue id to log time on (only one id is required).'
-                  project_id:
-                    title: ProjectId
-                    type: integer
-                    format: int32
-                    description: 'the project id to log time on (only one id is required).'
-                  spent_on:
-                    title: SpentOn
-                    type: string
-                    description: 'the date the time was spent (default to the current date); format is e.g. 2020-12-24'
-                  hours:
-                    title: Hours
-                    type: number
-                    format: float
-                    description: 'the number of spent hours'
-                  activity_id:
-                    title: ActivityId
-                    type: integer
-                    format: int32
-                    description: 'the id of the time activity. This parameter is required unless a default activity is defined in Redmine.'
-                  comments:
-                    title: Comments
-                    type: string
-                    description: 'short description for the entry (255 characters max)'
-                  user_id:
-                    title: UserId
-                    type: integer
-                    format: int32
-                    description: 'user id to be specified in need of posting time on behalf of another user'
+                  time_entries:
+                    type: array
+                    title: TimeEntries
+                    items:
+                      $ref: '#/components/schemas/timeEntry'
+                  total_count:
+                    $ref: '#/components/schemas/totalCount'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  limit:
+                    $ref: '#/components/schemas/limit'
+    post:
+      summary: Create a time entry
+      description: Creates a time entry.
+      operationId: TimeCreate
+      tags:
+        - TimeEntries
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              title: Body
+              required:
+                - time_entry
+              properties:
+                time_entry:
+                  title: TimeEntry
+                  type: object
+                  required:
+                    - hours
+                    - comments
+                  properties:
+                    issue_id:
+                      title: IssueId
+                      type: integer
+                      format: int32
+                      description: the issue id to log time on (only one id is required).
+                    project_id:
+                      title: ProjectId
+                      type: integer
+                      format: int32
+                      description: the project id to log time on (only one id is required).
+                    spent_on:
+                      title: SpentOn
+                      type: string
+                      description: >-
+                        the date the time was spent (default to the current
+                        date); format is e.g. 2020-12-24
+                    hours:
+                      title: Hours
+                      type: string
+                      description: the number of spent hours
+                    activity_id:
+                      title: ActivityId
+                      type: integer
+                      format: int32
+                      description: >-
+                        the id of the time activity. This parameter is required
+                        unless a default activity is defined in Redmine.
+                    comments:
+                      title: Comments
+                      type: string
+                      description: short description for the entry (255 characters max)
+                    user_id:
+                      title: UserId
+                      type: integer
+                      format: int32
+                      description: >-
+                        user id to be specified in need of posting time on
+                        behalf of another user
+        description: the time entry to add. (either issue_id or project id is required!)
+        required: true
       responses:
-        201:
+        '201':
           description: 'Created: time entry was created'
-        422:
-          $ref: '#/responses/validationError'
+        '422':
+          $ref: '#/components/responses/validationError'
   /time_entries/{id}.json:
     get:
-      summary: 'Show time entry'
-      description: 'Returns the time entry of given id.'
+      summary: Show time entry
+      description: Returns the time entry of given id.
       operationId: TimeShow
-      tags: [ TimeEntries ]
+      tags:
+        - TimeEntries
       parameters:
-        - $ref: '#/parameters/idParam'
+        - $ref: '#/components/parameters/idParam'
       responses:
-        200:
+        '200':
           description: OK
-          schema:
-            type: object
-            required:
-              - time_entry
-            properties:
-              time_entry:
-                $ref: '#/definitions/timeEntry'
-    put:
-      summary: 'Update a time entry'
-      description: 'Updates a time entry.'
-      operationId: TimeUpdate
-      tags: [ TimeEntries ]
-      parameters:
-        - $ref: '#/parameters/idParam'
-        - name: time_entry
-          in: body
-          required: true
-          description: the time entry attributes
-          schema:
-            title: Body
-            type: object
-            required:
-              - time_entry
-            properties:
-              time_entry:
-                title: TimeEntry
+          content:
+            application/json:
+              schema:
                 type: object
+                required:
+                  - time_entry
                 properties:
-                  issue_id:
-                    title: IssueId
-                    type: integer
-                    format: int32
-                  project_id:
-                    title: ProjectId
-                    type: integer
-                    format: int32
-                  spent_on:
-                    title: SpentOn
-                    type: string
-                  hours:
-                    title: Hours
-                    type: number
-                    format: float
-                    description: 'the number of spent hours'
-                  activity_id:
-                    title: ActivityId
-                    type: integer
-                    format: int32
-                  comments:
-                    title: Comments
-                    type: string
-                    description: 'short description for the entry (255 characters max)'
-                  user_id:
-                    title: UserId
-                    type: integer
-                    format: int32
-                    description: 'user id to be specified in need of posting time on behalf of another user'
-      responses:
-        200:
-          description: 'OK: time entry was updated'
-        422:
-          $ref: '#/responses/validationError'
-    delete:
-      summary: 'Delete a time entry'
-      description: 'Deletes a time entry.'
-      operationId: TimeDelete
-      tags: [ TimeEntries ]
+                  time_entry:
+                    $ref: '#/components/schemas/timeEntry'
+    put:
+      summary: Update a time entry
+      description: Updates a time entry.
+      operationId: TimeUpdate
+      tags:
+        - TimeEntries
       parameters:
-        - $ref: '#/parameters/idParam'
+        - $ref: '#/components/parameters/idParam'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: Body
+              type: object
+              required:
+                - time_entry
+              properties:
+                time_entry:
+                  title: TimeEntry
+                  type: object
+                  properties:
+                    issue_id:
+                      title: IssueId
+                      type: integer
+                      format: int32
+                    project_id:
+                      title: ProjectId
+                      type: integer
+                      format: int32
+                    spent_on:
+                      title: SpentOn
+                      type: string
+                    hours:
+                      title: Hours
+                      type: string
+                      description: the number of spent hours
+                    activity_id:
+                      title: ActivityId
+                      type: integer
+                      format: int32
+                    comments:
+                      title: Comments
+                      type: string
+                      description: short description for the entry (255 characters max)
+                    user_id:
+                      title: UserId
+                      type: integer
+                      format: int32
+                      description: >-
+                        user id to be specified in need of posting time on
+                        behalf of another user
+        description: the time entry attributes
+        required: true
       responses:
-        200:
+        '200':
+          description: 'OK: time entry was updated'
+        '422':
+          $ref: '#/components/responses/validationError'
+    delete:
+      summary: Delete a time entry
+      description: Deletes a time entry.
+      operationId: TimeDelete
+      tags:
+        - TimeEntries
+      parameters:
+        - $ref: '#/components/parameters/idParam'
+      responses:
+        '200':
           description: OK
   /issue_statuses.json:
     get:
-      summary: 'List issue Statuses'
-      description: 'Returns the list of all issue statuses.'
+      summary: List issue Statuses
+      description: Returns the list of all issue statuses.
       operationId: StatusesList
-      tags: [ IssueStatuses ]
+      tags:
+        - IssueStatuses
       responses:
-          200:
-            description: OK
-            schema:
-              type: object
-              required:
-                - issue_statuses
-              properties:
-                issue_statuses: #array
-                  title: IssueStatuses
-                  type: array
-                  items:
-                    $ref: '#/definitions/issueStatus'
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - issue_statuses
+                properties:
+                  issue_statuses:
+                    title: IssueStatuses
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/issueStatus'
   /trackers.json:
     get:
-      summary: 'List trackers'
-      description: 'Returns the list of all trackers.'
+      summary: List trackers
+      description: Returns the list of all trackers.
       operationId: TrackersList
-      tags: [ Trackers ]
+      tags:
+        - Trackers
       responses:
-        200:
+        '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - trackers
+                properties:
+                  trackers:
+                    title: Trackers
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/tracker'
+  /enumerations/{resource}.json:
+    get:
+      summary: List Enumerations
+      description: >-
+        Possible parameters: issue_priorities, time_entry_activities,
+        document_categories
+      operationId: EnumerationsList
+      tags:
+        - Enumerations
+      parameters:
+        - name: resource
+          in: path
+          description: >-
+            Possible values: issue_priorities, time_entry_activities,
+            document_categories
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  time_entry_activities:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/enumeration'
+                  document_categories:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/enumeration'
+                  issue_priorities:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/enumeration'
+servers:
+  - url: https://localhost:8080
+components:
+  parameters:
+    idParam:
+      name: id
+      in: path
+      description: id or identifier of the project/issue/user/timeEntry
+      required: true
+      schema:
+        type: string
+    limitParam:
+      name: limit
+      in: query
+      description: >-
+        the number of items to be present in the response (default is 25,
+        maximum is 100)
+      required: false
+      schema:
+        type: integer
+        format: int32
+    offsetParam:
+      name: offset
+      in: query
+      description: the offset of the first object to retrieve
+      required: false
+      schema:
+        type: integer
+        format: int32
+  responses:
+    validationError:
+      description: Unprocessable Entity
+      content:
+        application/json:
           schema:
             type: object
             required:
-              - trackers
+              - errors
             properties:
-              trackers:
-                title: Trackers
+              errors:
+                title: Errors
                 type: array
                 items:
-                  $ref: '#/definitions/tracker'
-  /enumerations/{resource}.json:
-    get:
-      summary: 'List Enumerations'
-      description: 'Possible parameters: issue_priorities, time_entry_activities, document_categories'
-      operationId: EnumerationsList
-      tags: [ Enumerations ]
-      parameters:
-        - name: 'resource'
-          in: path
-          description: 'Possible values: issue_priorities, time_entry_activities, document_categories'
-          required: true
-          type: string
-      responses:
-        200:
-          description: OK
-          schema:
-            type: object
-            properties:
-              time_entry_activities:
-                type: array
-                items:
-                  $ref: '#/definitions/enumeration'
-              document_categories:
-                type: array
-                items:
-                  $ref: '#/definitions/enumeration'
-              issue_priorities:
-                type: array
-                items:
-                  $ref: '#/definitions/enumeration'
-
-## Parameters
-# https://swagger.io/docs/specification/2-0/describing-parameters/
-parameters:
-  idParam:
-    name: "id"
-    in: path
-    description: "id or identifier of the project/issue/user/timeEntry"
-    required: true
-    type: string
-  limitParam:
-    name: limit
-    in: query
-    description: "the number of items to be present in the response (default is 25, maximum is 100)"
-    required: false
-    type: integer
-    format: int32
-  offsetParam:
-    name: offset
-    in: query
-    description: "the offset of the first object to retrieve"
-    required: false
-    type: integer
-    format: int32
-
-
-## Responses
-# https://swagger.io/docs/specification/2-0/describing-responses/
-responses:
-  validationError:
-    description: 'Unprocessable Entity'
-    schema:
+                  type: string
+  securitySchemes:
+    api_key:
+      type: apiKey
+      in: header
+      name: X-Redmine-API-Key
+  schemas:
+    idNameObject:
       type: object
       required:
-        - errors
+        - id
+        - name
       properties:
-        errors:
-          title: Errors
+        id:
+          title: Id
+          type: integer
+          format: int32
+        name:
+          title: Name
+          type: string
+    totalCount:
+      title: TotalCount
+      type: integer
+      format: int32
+    offset:
+      title: Offset
+      type: integer
+      format: int32
+    limit:
+      title: Limit
+      type: integer
+      format: int32
+    project:
+      type: object
+      title: Project
+      required:
+        - id
+        - name
+        - identifier
+        - description
+        - status
+        - created_on
+        - updated_on
+        - is_public
+      properties:
+        id:
+          title: Id
+          type: integer
+          format: int32
+        name:
+          title: Name
+          type: string
+        identifier:
+          title: Identifier
+          type: string
+        description:
+          title: Description
+          type: string
+        status:
+          title: Status
+          type: integer
+          format: int32
+        is_public:
+          title: IsPublic
+          type: boolean
+        created_on:
+          title: CreatedOn
+          type: string
+        updated_on:
+          title: UpdatedOn
+          type: string
+        parent:
+          title: Parent
+          type: object
+          required:
+            - id
+            - name
+          properties:
+            id:
+              title: Id
+              type: integer
+              format: int32
+            name:
+              title: Name
+              type: string
+        issue_categories:
+          title: IssueCategories
           type: array
           items:
-            type: string
-
-
-## Input and Output Models
-# Common data structure (schema object) definitions.
-definitions:
-  idNameObject:
-    type: object
-    required:
-      - id
-      - name
-    properties:
-      id:
-        title: Id
-        type: integer
-        format: int32
-      name:
-        title: Name
-        type: string
-  totalCount:
-    title: TotalCount
-    type: integer
-    format: int32
-  offset:
-    title: Offset
-    type: integer
-    format: int32
-  limit:
-    title: Limit
-    type: integer
-    format: int32
-  project:
-    type: object
-    title: Project
-    required:
-      - id
-      - name
-      - identifier
-      - description
-      - status
-      - created_on
-      - updated_on
-      - is_public
-    properties:
-      id:
-        title: Id
-        type: integer
-        format: int32
-      name:
-        title: Name
-        type: string
-      identifier:
-        title: Identifier
-        type: string
-      description:
-        title: Description
-        type: string
-      status:
-        title: Status
-        type: integer
-        format: int32
-      is_public:
-        title: IsPublic
-        type: boolean
-      created_on:
-        title: CreatedOn
-        type: string
-      updated_on:
-        title: UpdatedOn
-        type: string
-      parent:
-        title: Parent
-        type: object
-        required:
-          - id
-          - name
-        properties:
-          id:
-            title: Id
-            type: integer
-            format: int32
-          name:
-            title: Name
-            type: string
-      #below: optional associated data from 'include' parameter
-      issue_categories:
-        title: IssueCategories
-        type: array
-        items:
+            type: object
+            required:
+              - id
+              - name
+            properties:
+              id:
+                title: Id
+                type: integer
+                format: int32
+              name:
+                title: Name
+                type: string
+        trackers:
+          title: Trackers
+          type: array
+          items:
+            type: object
+            required:
+              - id
+              - name
+            properties:
+              id:
+                title: Id
+                type: integer
+                format: int32
+              name:
+                title: Name
+                type: string
+        enabled_modules:
+          title: EnabledModules
+          type: array
+          items:
+            type: object
+            required:
+              - id
+              - name
+            properties:
+              id:
+                title: Id
+                type: integer
+                format: int32
+              name:
+                title: Name
+                type: string
+        time_entry_activities:
+          title: TimeEntryActivities
+          type: array
+          items:
+            type: object
+            required:
+              - id
+              - name
+            properties:
+              id:
+                title: Id
+                type: integer
+                format: int32
+              name:
+                title: Name
+                type: string
+    issue:
+      type: object
+      title: Issue
+      required:
+        - id
+        - project
+        - tracker
+        - status
+        - priority
+        - author
+        - subject
+        - description
+        - start_date
+        - due_date
+        - done_ratio
+        - is_private
+        - estimated_hours
+        - created_on
+        - updated_on
+        - closed_on
+      properties:
+        id:
+          title: Id
+          type: integer
+          format: int32
+        project:
+          title: Project
           type: object
           required:
             - id
@@ -843,10 +973,8 @@ definitions:
             name:
               title: Name
               type: string
-      trackers:
-        title: Trackers
-        type: array
-        items:
+        tracker:
+          title: Tracker
           type: object
           required:
             - id
@@ -859,10 +987,8 @@ definitions:
             name:
               title: Name
               type: string
-      enabled_modules:
-        title: EnabledModules
-        type: array
-        items:
+        status:
+          title: Status
           type: object
           required:
             - id
@@ -875,10 +1001,8 @@ definitions:
             name:
               title: Name
               type: string
-      time_entry_activities:
-        title: TimeEntryActivities
-        type: array
-        items:
+        priority:
+          title: Priority
           type: object
           required:
             - id
@@ -891,357 +1015,273 @@ definitions:
             name:
               title: Name
               type: string
-  issue:
-    type: object
-    title: Issue
-    required:
-      - id
-      - project
-      - tracker
-      - status
-      - priority
-      - author
-      - subject
-      - description
-      - start_date
-      - due_date
-      - done_ratio
-      - is_private
-      - estimated_hours
-      - created_on
-      - updated_on
-      - closed_on
-    properties:
-      id:
-        title: Id
-        type: integer
-        format: int32
-      project:
-        title: Project
-        type: object
-        required:
-          - id
-          - name
-        properties:
-          id:
-            title: Id
-            type: integer
-            format: int32
-          name:
-            title: Name
-            type: string
-      tracker:
-        title: Tracker
-        type: object
-        required:
-          - id
-          - name
-        properties:
-          id:
-            title: Id
-            type: integer
-            format: int32
-          name:
-            title: Name
-            type: string
-      status:
-        title: Status
-        type: object
-        required:
-          - id
-          - name
-        properties:
-          id:
-            title: Id
-            type: integer
-            format: int32
-          name:
-            title: Name
-            type: string
-      priority:
-        title: Priority
-        type: object
-        required:
-          - id
-          - name
-        properties:
-          id:
-            title: Id
-            type: integer
-            format: int32
-          name:
-            title: Name
-            type: string
-      author:
-        title: Author
-        type: object
-        required:
-          - id
-          - name
-        properties:
-          id:
-            title: Id
-            type: integer
-            format: int32
-          name:
-            title: Name
-            type: string
-      assigned_to:
-        title: AssignedTo
-        type: object
-        required:
-          - id
-          - name
-        properties:
-          id:
-            title: Id
-            type: integer
-            format: int32
-          name:
-            title: Name
-            type: string
-      subject:
-        title: Subject
-        type: string
-      description:
-        title: Description
-        type: string
-      start_date:
-        title: StartDate
-        type: string
-      due_date:
-        title: DueDate
-        type: string
-      done_ratio:
-        title: DoneRatio
-        type: integer
-        format: int32
-      is_private:
-        title: Is Private
-        type: boolean
-      estimated_hours:
-        title: EstimatedHours
-        type: number
-        format: float
-      created_on:
-        title: CreatedOn
-        type: string
-      updated_on:
-        title: UpdatedOn
-        type: string
-      closed_on:
-        title: ClosedOn
-        type: string
-      #below: optional associated data from 'include' parameter
-      children:
-        title: Children
-        type: array
-        items:
-          $ref: '#/definitions/idNameObject'
-      attachments:
-        title: Attachments
-        type: array
-        items:
-          $ref: '#/definitions/idNameObject'
-      relations:
-        title: Realtions
-        type: array
-        items:
-          $ref: '#/definitions/idNameObject'
-      changesets:
-        title: Chagesets
-        type: array
-        items:
-          $ref: '#/definitions/idNameObject'
-      journals:
-        title: Journals
-        type: array
-        items:
-          title: Journal
+        author:
+          title: Author
           type: object
+          required:
+            - id
+            - name
           properties:
             id:
               title: Id
               type: integer
               format: int32
-            user:
-              $ref: '#/definitions/idNameObject'
-            notes:
+            name:
+              title: Name
               type: string
-            created_on:
+        assigned_to:
+          title: AssignedTo
+          type: object
+          required:
+            - id
+            - name
+          properties:
+            id:
+              title: Id
+              type: integer
+              format: int32
+            name:
+              title: Name
               type: string
-            private_notes:
-              type: boolean
-            details:
-              type: array
-              items:
-                type: object
-                properties:
-                  property:
-                    type: string
-                  name:
-                    type: string
-                  old_value:
-                    type: string
-                  new_value:
-                    type: string
-      watchers:
-        title: Watchers
-        type: array
-        items:
-          $ref: '#/definitions/idNameObject'
-  timeEntry:
-    type: object
-    title: TimeEntry
-    required:
-      - id
-      - project
-      - user
-      - activity
-      - hours
-      - comments
-      - spent_on
-      - created_on
-      - updated_on
-    properties:
-      id:
-        title: Id
-        type: integer
-        format: int32
-      project:
-        title: Project
-        type: object
-        required:
-          - id
-          - name
-        properties:
-          id:
-            title: Id
-            type: integer
-            format: int32
-          name:
-            title: Name
-            type: string
-      issue:
-        title: Issue
-        type: object
-        required:
-          - id
-        properties:
-          id:
-            title: Id
-            type: integer
-            format: int32
-      user:
-        title: User
-        type: object
-        required:
-          - id
-          - name
-        properties:
-          id:
-            title: Id
-            type: integer
-            format: int32
-          name:
-            title: Name
-            type: string
-      activity:
-        title: Activity
-        type: object
-        required:
-          - id
-          - name
-        properties:
-          id:
-            title: Id
-            type: integer
-            format: int32
-          name:
-            title: Name
-            type: string
-      hours:
-        title: Hours
-        type: number
-        format: float
-      comments:
-        title: Comments
-        type: string
-      spent_on:
-        title: SpentOn
-        type: string
-      created_on:
-        title: CreatedOn
-        type: string
-      updated_on:
-        title: UpdatedOn
-        type: string
-  issueStatus:
-    title: IssueStatus
-    type: object
-    required:
-      - id
-      - name
-      - is_default
-      - is_closed
-    properties:
-      id:
-        title: Id
-        type: integer
-        format: int32
-      name:
-        title: Name
-        type: string
-      is_default:
-        title: IsDefault
-        type: boolean
-      is_closed:
-        title: IsClosed
-        type: boolean
-  tracker:
-    title: IssueStatus
-    type: object
-    required:
-      - id
-      - name
-      - default_status
-    properties:
-      id:
-        title: Id
-        type: integer
-        format: int32
-      name:
-        title: Name
-        type: string
-      default_status:
-        title: DefaultStatus
-        type: object
-        required:
-          - id
-          - name
-        properties:
-          id:
-            title: Id
-            type: integer
-            format: int32
-          name:
-            title: Name
-            type: string
-  enumeration:
-    title: Enumeration
-    type: object
-    required:
-      - id
-      - name
-      - is_default
-    properties:
-      id:
-        title: Id
-        type: integer
-        format: int32
-      name:
-        title: Name
-        type: string
-      is_default:
-        title: IsDefault
-        type: boolean
+        subject:
+          title: Subject
+          type: string
+        description:
+          title: Description
+          type: string
+        start_date:
+          title: StartDate
+          type: string
+        due_date:
+          title: DueDate
+          type: string
+        done_ratio:
+          title: DoneRatio
+          type: integer
+          format: int32
+        is_private:
+          title: Is Private
+          type: boolean
+        estimated_hours:
+          title: EstimatedHours
+          type: number
+        created_on:
+          title: CreatedOn
+          type: string
+        updated_on:
+          title: UpdatedOn
+          type: string
+        closed_on:
+          title: ClosedOn
+          type: string
+        children:
+          title: Children
+          type: array
+          items:
+            $ref: '#/components/schemas/idNameObject'
+        attachments:
+          title: Attachments
+          type: array
+          items:
+            $ref: '#/components/schemas/idNameObject'
+        relations:
+          title: Realtions
+          type: array
+          items:
+            $ref: '#/components/schemas/idNameObject'
+        changesets:
+          title: Chagesets
+          type: array
+          items:
+            $ref: '#/components/schemas/idNameObject'
+        journals:
+          title: Journals
+          type: array
+          items:
+            title: Journal
+            type: object
+            properties:
+              id:
+                title: Id
+                type: integer
+                format: int32
+              user:
+                $ref: '#/components/schemas/idNameObject'
+              notes:
+                type: string
+              created_on:
+                type: string
+              private_notes:
+                type: boolean
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    property:
+                      type: string
+                    name:
+                      type: string
+                    old_value:
+                      type: string
+                    new_value:
+                      type: string
+        watchers:
+          title: Watchers
+          type: array
+          items:
+            $ref: '#/components/schemas/idNameObject'
+    timeEntry:
+      type: object
+      title: TimeEntry
+      required:
+        - id
+        - project
+        - user
+        - activity
+        - hours
+        - comments
+        - spent_on
+        - created_on
+        - updated_on
+      properties:
+        id:
+          title: Id
+          type: integer
+          format: int32
+        project:
+          title: Project
+          type: object
+          required:
+            - id
+            - name
+          properties:
+            id:
+              title: Id
+              type: integer
+              format: int32
+            name:
+              title: Name
+              type: string
+        issue:
+          title: Issue
+          type: object
+          required:
+            - id
+          properties:
+            id:
+              title: Id
+              type: integer
+              format: int32
+        user:
+          title: User
+          type: object
+          required:
+            - id
+            - name
+          properties:
+            id:
+              title: Id
+              type: integer
+              format: int32
+            name:
+              title: Name
+              type: string
+        activity:
+          title: Activity
+          type: object
+          required:
+            - id
+            - name
+          properties:
+            id:
+              title: Id
+              type: integer
+              format: int32
+            name:
+              title: Name
+              type: string
+        hours:
+          title: Hours
+          type: string
+        comments:
+          title: Comments
+          type: string
+        spent_on:
+          title: SpentOn
+          type: string
+        created_on:
+          title: CreatedOn
+          type: string
+        updated_on:
+          title: UpdatedOn
+          type: string
+    issueStatus:
+      title: IssueStatus
+      type: object
+      required:
+        - id
+        - name
+        - is_default
+        - is_closed
+      properties:
+        id:
+          title: Id
+          type: integer
+          format: int32
+        name:
+          title: Name
+          type: string
+        is_default:
+          title: IsDefault
+          type: boolean
+        is_closed:
+          title: IsClosed
+          type: boolean
+    tracker:
+      title: IssueStatus
+      type: object
+      required:
+        - id
+        - name
+        - default_status
+      properties:
+        id:
+          title: Id
+          type: integer
+          format: int32
+        name:
+          title: Name
+          type: string
+        default_status:
+          title: DefaultStatus
+          type: object
+          required:
+            - id
+            - name
+          properties:
+            id:
+              title: Id
+              type: integer
+              format: int32
+            name:
+              title: Name
+              type: string
+    enumeration:
+      title: Enumeration
+      type: object
+      required:
+        - id
+        - name
+        - is_default
+      properties:
+        id:
+          title: Id
+          type: integer
+          format: int32
+        name:
+          title: Name
+          type: string
+        is_default:
+          title: IsDefault
+          type: boolean
