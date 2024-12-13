@@ -4,13 +4,17 @@
   <br>
   <a href="https://github.com/Lerrrtaste/redmine-openapi-specification/blob/main/redlab_openapi_logo.png?raw=true"><img src="https://user-images.githubusercontent.com/22920627/112852229-0655e800-90ac-11eb-819f-15e7d9096ecb.png" alt="Markdownify" width="600"></a>
   <br>
-  Redmine OpenAPI v2.0 Specification
+  Redmine OpenAPI v3.0 Specification
   <br>
 </h1>
 
 <h4 align="center">OpenAPI (<a href="https://swagger.io/">Swagger</a>) Specification for the Redmine Rest API</h4>
 
+This is a clone from the original Redmine OpenAPI Specification by [Lerrrtaste](https://github.com/Lerrrtaste/redmine-openapi-specification). I found that some parts where not working as expected and buggy (for our use case). We also migrated the specification to OpenAPI 3.0.0.
 
+The goal for our project is to be used with the openapi-generator to generate Java client code.
+
+**Currently work in progress.**
 
 <p align="center">
   <a href="#download">Download</a> <br>•<br>
